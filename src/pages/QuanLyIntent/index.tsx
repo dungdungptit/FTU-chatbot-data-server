@@ -3,11 +3,12 @@
 import TableBase from '@/components/Table';
 import type { IIntentRecord } from '@/models/intent';
 import { IColumn } from '@/utils/interfaces';
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
-import { Button, Card, Divider, Popconfirm } from 'antd';
-import React from 'react';
+import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { Breadcrumb, Button, Card, Divider, Popconfirm } from 'antd';
+import React, { useEffect } from 'react';
 import { useModel, history } from 'umi';
 import FormIntent from './FormIntent';
+import { ITopicRecord } from '@/models/outline';
 
 
 const Index = () => {
@@ -15,16 +16,22 @@ const Index = () => {
   const topicID = pathname.split('/')[2];
   console.log(topicID, 'topicID');
   const intentModel = useModel('intent');
-
+  const name = intentModel?.record?.name ?? '';
+  useEffect(() => {
+    if (topicID) intentModel.getData(topicID);
+  }, []);
   const handleEdit = (record: IIntentRecord) => {
     intentModel.setVisibleForm(true);
     intentModel.setEdit(true);
     intentModel.setRecord(record);
   };
 
-  const handleDel = async (record: IIntentRecord) => {
-    await intentModel.del({ id: record?.id ?? '', topicID }).then(() => {
-      intentModel.getData(topicID);
+  const handleDel = async (record: ITopicRecord) => {
+    console.log("record delete", record);
+
+    await intentModel.del(record?.id ?? "").then(() => {
+      if (topicID) intentModel.getData(topicID);
+
     });
   };
 
@@ -112,31 +119,57 @@ const Index = () => {
   ];
 
   return (
-    <>
-      <TableBase
-        modelName={'intent'}
-        title="Danh sách thông tin trong chủ đề"
-        columns={columns}
-        hascreate={true}
-        formType={'Modal'}
-        dependencies={[intentModel.page, intentModel.limit, intentModel.condition]}
-        widthDrawer={800}
-        getData={() => intentModel.getData(topicID)}
-        Form={FormIntent}
-        noCleanUp={true}
-        params={{
-          page: intentModel.page,
-          size: intentModel.limit,
-          condition: intentModel.condition,
-        }}
-        maskCloseableForm={true}
-        otherProps={{
-          scroll: {
-            x: 1000,
-          },
-        }}
-      />
-    </>
+    <div>
+      <Card>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Breadcrumb>
+            <Breadcrumb.Item
+              onClick={() => {
+                history.push(`/topic`);
+              }}
+            >
+              <b style={{ cursor: 'pointer' }}>
+                <ArrowLeftOutlined />
+                Quay lại
+              </b>
+            </Breadcrumb.Item>
+            {/* <Breadcrumb.Item>
+              <b>Thông tin: {name}</b>
+            </Breadcrumb.Item> */}
+          </Breadcrumb>
+        </div>
+        <br />
+        <TableBase
+          modelName={'intent'}
+          title="Danh sách thông tin trong chủ đề"
+          columns={columns}
+          hascreate={true}
+          formType={'Modal'}
+          dependencies={[intentModel.page, intentModel.limit, intentModel.condition]}
+          widthDrawer={800}
+          getData={() => { if (topicID) intentModel.getData(topicID) }}
+          Form={FormIntent}
+          noCleanUp={true}
+          params={{
+            page: intentModel.page,
+            size: intentModel.limit,
+            condition: intentModel.condition,
+          }}
+          maskCloseableForm={true}
+          otherProps={{
+            scroll: {
+              x: 1000,
+            },
+          }}
+        />
+      </Card>
+    </div>
   );
 };
 

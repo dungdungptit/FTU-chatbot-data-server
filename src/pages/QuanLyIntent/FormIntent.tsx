@@ -3,6 +3,7 @@ import { IIntentRecord } from '@/models/intent';
 import topic from '@/services/Outline/outline';
 import { ip } from '@/utils/ip';
 import rules from '@/utils/rules';
+import { DeleteOutlined } from '@ant-design/icons';
 import {
   Form,
   Input,
@@ -16,10 +17,11 @@ import {
   Row,
   Select,
   Divider,
+  Popconfirm,
 } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import React, { useEffect, useState } from 'react';
-import { useModel } from 'umi';
+import { history, useModel } from 'umi';
 
 const layout = {
   labelCol: { span: 6 },
@@ -38,6 +40,7 @@ const FormIntent = () => {
   const questionModel = useModel('question');
   const pathname = window.location.pathname;
   const topicID = pathname.split('/')[2];
+  const IntentID = pathname.split('/')[4];
   console.log(topicID, 'topicID');
   const handleFinish = async (values: IIntentRecord) => {
     if (intentModel.edit) {
@@ -55,7 +58,8 @@ const FormIntent = () => {
         await intentModel.upd({ id: intentModel?.record?.id, data: payload, topicID: topicID });
         intentModel.setVisibleForm(false);
         intentModel.setEdit(false);
-        intentModel.getData(topicID);
+        if (topicID) intentModel.getData(topicID)
+        if (IntentID) intentModel.getDataById(IntentID)
         // intentModel.getDataById(intentModel?.record?.id ?? '');
       } else {
         const payload = {
@@ -69,6 +73,8 @@ const FormIntent = () => {
           }
         }
         await intentModel.add(payload);
+        if (topicID) intentModel.getData(topicID)
+        if (IntentID) intentModel.getDataById(IntentID)
       }
     } else {
       const payload = {
@@ -84,7 +90,20 @@ const FormIntent = () => {
       await intentModel.add(payload);
       intentModel.setVisibleForm(false);
       intentModel.setEdit(false);
+      if (topicID) intentModel.getData(topicID)
+      if (IntentID) intentModel.getDataById(IntentID)
     }
+  };
+
+  const handleDel = async (record: IIntentRecord) => {
+    console.log("record delete", record);
+
+    await intentModel.del(record?.id ?? "").then(() => {
+      intentModel.setVisibleForm(false);
+      intentModel.setEdit(false);
+      if (topicID) intentModel.getData(topicID)
+      history.push(`/topic/${topicID}/intent`);
+    });
   };
 
   const handleFinishFile = async (values: any) => {
@@ -125,9 +144,17 @@ const FormIntent = () => {
               }} />
             </Form.Item>
             <Form.Item {...tailLayout}>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" style={{ marginRight: '8px' }}>
                 {intentModel.edit ? 'Cập nhật' : 'Thêm mới'}
               </Button>
+              <Popconfirm
+                title="Bạn có muốn xóa?"
+                okText="Có"
+                cancelText="Không"
+                onConfirm={() => handleDel(intentModel?.record)}
+              >
+                <Button type="primary">Xóa</Button>
+              </Popconfirm>
             </Form.Item>
           </Form>
         </Card>

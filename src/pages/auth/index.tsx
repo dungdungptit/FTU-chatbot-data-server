@@ -17,48 +17,57 @@ const Login: React.FC = () => {
     const formdata = new FormData();
     formdata.append('username', values.username);
     formdata.append('password', values.password);
-    const res = await loginModel(formdata);
-    // console.log(res);
-
-    if (res.data?.error?.status === 403) {
-      console.log("Forbidden");
-
-      localStorage.removeItem("token");
-    }
-    if (res.status === 200 && res.data?.jwt) {
-      localStorage.setItem('token', res.data?.jwt);
-      try {
-        await write(res.data?.jwt);
-        const info = await getInfo();
-        localStorage.setItem('username', info.data?.username);
-        console.log('info', info);
-        if (info.status === 200) {
-          let systemRole = 'Admin';
-          // if (info.data?.is_superuser === true) {
-          //   systemRole = 'Admin';
-          // } else if (info.data?.is_staff === true) {
-          //   systemRole = 'Staff';
-          // } else {
-          //   systemRole = 'User';
-          // }
-          localStorage.setItem('vaiTro', systemRole);
-          setInitialState({
-            ...initialState,
-            currentUser: {
-              ...info.data,
-              systemRole: systemRole,
-            },
-          });
-          history.push(data?.path?.[systemRole] ?? '/');
-          return;
+    
+    try {
+      const res = await loginModel(formdata);
+      if (res.data?.error?.status === 403) {
+        console.log("Forbidden");
+  
+        localStorage.removeItem("token");
+      }
+      if (res.status === 200 && res.data?.jwt) {
+        localStorage.setItem('token', res.data?.jwt);
+        try {
+          await write(res.data?.jwt);
+          const info = await getInfo();
+          localStorage.setItem('username', info.data?.username);
+          console.log('info', info);
+          if (info.status === 200) {
+            let systemRole = 'Admin';
+            // if (info.data?.is_superuser === true) {
+            //   systemRole = 'Admin';
+            // } else if (info.data?.is_staff === true) {
+            //   systemRole = 'Staff';
+            // } else {
+            //   systemRole = 'User';
+            // }
+            localStorage.setItem('vaiTro', systemRole);
+            setInitialState({
+              ...initialState,
+              currentUser: {
+                ...info.data,
+                systemRole: systemRole,
+              },
+            });
+            history.push(data?.path?.[systemRole] ?? '/');
+            return;
+          }
+        }
+        catch (err) {
+          localStorage.removeItem("token");
+          console.log(err);
         }
       }
-      catch (err) {
-        localStorage.removeItem("token");
-        console.log(err);
-      }
+      history.push('/');
     }
-    history.push('/');
+    catch (err) {
+      localStorage.removeItem("token");
+      console.log(err);
+    }
+    
+    // console.log(res);
+
+    
   };
 
   const onFinishFailed = (errorInfo: any) => {

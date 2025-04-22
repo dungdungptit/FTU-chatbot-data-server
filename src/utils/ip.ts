@@ -1,5 +1,5 @@
-const ip3 = 'http://222.252.29.85:19881'; // ip dev
-const ip = 'http://222.252.29.85:19837'; // ip dev
+const ip3 = 'https://ftu-llm-be.ript.vn'; // ip dev
+const ip = 'https://ftu-qldl-be.ript.vn'; // ip dev
 
 // const ip3 = 'http://192.168.30.14:8081'; // ip dev
 // const ip = 'http://192.168.30.14:1337'; // ip dev

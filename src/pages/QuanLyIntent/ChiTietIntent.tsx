@@ -3,7 +3,7 @@ import { Breadcrumb, Button, Card, Descriptions, Drawer, Image, Tag, Typography 
 import moment from 'moment';
 import Animate from 'rc-animate';
 import React, { useEffect, useState } from 'react';
-import { useModel } from 'umi';
+import { useModel, history } from 'umi';
 
 import { Tabs } from 'antd';
 import type { TabsProps } from 'antd';
@@ -24,6 +24,8 @@ const Device = ({ }) => {
   const name = intentModel?.record?.name ?? '';
   const recordDevice = intentModel?.record ?? {};
   const pathname = window.location.pathname;
+  const topicID = pathname.split('/')[2];
+  console.log(topicID, 'topicID');
   const IntentID = pathname.split('/')[4];
 
   const onClose = () => {
@@ -53,7 +55,7 @@ const Device = ({ }) => {
           <Breadcrumb>
             <Breadcrumb.Item
               onClick={() => {
-                history.back();
+                history.push(`/topic/${topicID}/intent`);
               }}
             >
               <b style={{ cursor: 'pointer' }}>

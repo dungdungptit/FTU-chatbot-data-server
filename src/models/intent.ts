@@ -114,7 +114,7 @@ export default () => {
   const del = async (data: any) => {
     try {
       setLoading(true);
-      const res = await intent.del(data?.id);
+      const res = await intent.del(data);
       if (res.status === 200) {
         message.success('Xóa thành công');
         getData(data?.topicID);
